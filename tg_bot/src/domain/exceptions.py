@@ -2,29 +2,13 @@ class UserNotFoundError(Exception):
     ...
 
 
-class PhoneBadFormatError(Exception):
+class TelegramIsAlreadyLinkedError(Exception):
     ...
 
 
-class PhoneAlreadyExistsError(Exception):
+class OKUserIsActivatedError(Exception):
     ...
 
 
-class PhoneBadCountryError(Exception):
-    ...
-
-
-class EmailBadFormatError(Exception):
-    ...
-
-
-class EmailAlreadyExistsError(Exception):
-    ...
-
-
-class FioFormatError(Exception):
-    ...
-
-
-class NotFoundRegionError(Exception):
+class BadUserIsActivatedError(Exception):
     ...

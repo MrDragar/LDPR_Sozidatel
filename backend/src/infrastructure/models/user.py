@@ -12,7 +12,7 @@ class UserORM(Base):
     __tablename__ = "users"
 
     id: Mapped[uuid.UUID] = mapped_column("id", primary_key=True)
-    telegram_id: Mapped[uuid.UUID] = mapped_column("telegram_id", unique=True, index=True,
+    telegram_id: Mapped[int] = mapped_column("telegram_id", unique=True, index=True,
                                                    nullable=True)
     is_member: Mapped[bool] = mapped_column("is_member", nullable=False)
     username: Mapped[str] = mapped_column("username", nullable=True)

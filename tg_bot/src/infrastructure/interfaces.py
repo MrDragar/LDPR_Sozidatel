@@ -19,4 +19,3 @@ class IDatabase(ABC):
     @abstractmethod
     async def create_database(self) -> None:
         ...
-

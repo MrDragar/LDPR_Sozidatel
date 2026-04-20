@@ -1,7 +1,10 @@
 from abc import ABC, abstractmethod
 from contextlib import _AsyncGeneratorContextManager
+from datetime import timedelta
+from typing import Optional
+from uuid import UUID
 
-from .entities import User, Sources
+from .entities import User
 
 
 class IUnitOfWork(ABC):
@@ -12,19 +15,7 @@ class IUnitOfWork(ABC):
 
 class IUserRepository(ABC):
     @abstractmethod
-    async def create_user(self, user: User) -> User:
-        ...
-
-    @abstractmethod
-    async def get_user(self, user_id: int, source: Sources) -> User:
-        ...
-
-    @abstractmethod
-    async def is_phone_number_existing(self, phone_number: str) -> bool:
-        ...
-    
-    @abstractmethod
-    async def is_email_existing(self, email: str) -> bool:
+    async def get_user(self, user_id: UUID) -> User:
         ...
 
     @abstractmethod
@@ -37,13 +28,10 @@ class IUserRepository(ABC):
         ...
 
     @abstractmethod
-    async def update_user_news_subscription(
-            self, user_id: int, source: Sources, news_subscription: bool
-    ) -> User:
+    async def set_telegram_id_and_username(self, user_id: UUID, telegram_id: int, username: str) \
+            -> None:
         ...
-
-
-class IStringSorterRepository(ABC):
+    
     @abstractmethod
-    async def sort_by_similarity(self, target: str, string_list: list[str]) -> list[str]:
+    async def get_user_by_telegram_id(self, telegram_id: int) -> User:
         ...

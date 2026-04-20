@@ -24,7 +24,6 @@ async def main():
     container = Container()
     logging.debug(f"{vars(container)}, {container.user_service}")
     logging.debug("")
-    await container.database().create_database()
     di_middleware = DIProvideMiddleware(container)
     dp = Dispatcher()
     dp.update.middleware(di_middleware)
