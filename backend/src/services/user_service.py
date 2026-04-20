@@ -125,6 +125,17 @@ class UserService(IUserService):
                 raise
             return True
 
+    async def is_user_activated(self, user_id: UUID) -> bool:
+        async with self.__uow.atomic():
+            try:
+                user = await self.__user_repo.get_user(user_id)
+                if user.telegram_id is not None:
+                    return True
+                else:
+                    return False
+            except Exception:
+                raise
+
     async def validate_phone(self, phone_number: str) -> str:
         phone_number = phone_number.strip()
         if phone_number.startswith("+7"):

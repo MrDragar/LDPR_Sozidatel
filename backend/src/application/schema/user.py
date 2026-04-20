@@ -33,6 +33,11 @@ class UserCreateResponse(BaseModel):
     link: str
 
 
+class UserActivatedResponse(BaseModel):
+    id: UUID
+    is_activated: bool
+
+
 class ErrorResponse(BaseModel):
     detail: str
 
