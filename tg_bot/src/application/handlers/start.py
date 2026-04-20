@@ -63,7 +63,7 @@ async def start(
 Хочет присоединиться к команде ЛДПР: {'Да' if user.wish_to_join else 'Нет'}
 Домашний адрес: {user.home_address or 'не указан'}
 Подписка на новости: {'Есть' if user.news_subscription else 'Нет'}
-Номер участника: Б{user.id}
+Номер участника: Б{user.telegram_id}
 """)
 
 
