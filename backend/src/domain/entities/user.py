@@ -1,0 +1,35 @@
+from dataclasses import dataclass, field
+from datetime import date, datetime
+from uuid import UUID, uuid4
+
+
+@dataclass
+class User:
+    is_member: bool
+    surname: str
+    name: str
+    patronymic: str | None
+    birth_date: date
+    phone_number: str
+    region: str
+    email: str
+    gender: str
+    city: str
+    wish_to_join: bool
+
+    organization: str
+    industry: str
+    ogrn: int
+    website: str
+    nomination: str
+    answer1: str | None
+    answer2: str | None
+    answer3: str | None
+
+    home_address: str | None = None
+    telegram_id: int | None = None
+    username: str | None = None
+    id: UUID | None = field(default_factory=uuid4)
+    news_subscription: bool = field(default=False)
+    created_at: datetime = field(default_factory=lambda: datetime.now())
+
