@@ -100,7 +100,8 @@ class UserService(IUserService):
         user.email = await self.validate_email(user.email)
         user.name = await self.validate_fio_part(user.name, 'имя')
         user.surname = await self.validate_fio_part(user.surname, 'фамилия')
-        user.patronymic = await self.validate_fio_part(user.patronymic, 'отчество')
+        if user.patronymic:
+            user.patronymic = await self.validate_fio_part(user.patronymic, 'отчество')
         async with self.__uow.atomic():
             await self.__user_repo.create_user(user)
         return user
