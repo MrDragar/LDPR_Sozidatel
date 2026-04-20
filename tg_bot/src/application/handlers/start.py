@@ -69,6 +69,8 @@ async def start(
 
 @router.message()
 async def send_welcome_message(message: types.Message, user_service: IUserService):
+    if message.chat.id <= 0:
+        return
     if await user_service.is_tg_linked(message.from_user.id):
         return await message.reply('Спасибо за участие, ожидайте подведения результатов')
 
