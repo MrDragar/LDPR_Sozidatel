@@ -31,12 +31,13 @@ const SuccessPage: React.FC<SuccessPageProps> = ({ surname, name, patronymic, ge
             Заявка успешно<br className="hidden sm:block" /> подтверждена!
         </h1>
         
-        <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6 md:p-8 text-left">
-            <p className="text-xl text-slate-700 leading-relaxed">
+        <div className="text-left mt-8 w-full max-w-md mx-auto sm:max-w-none">
+            <p className="text-xl text-slate-700 leading-relaxed mb-6">
                 {greeting} <span className="font-bold text-gray-900">{fullName}</span>, спасибо за участие!
             </p>
-            <div className="mt-6 pt-6 border-t border-slate-200">
-                <p className="text-sm text-slate-500 mb-1 uppercase tracking-wider font-semibold">Ваша номинация</p>
+            <hr className="my-6 border-slate-200" />
+            <div>
+                <p className="text-sm text-slate-500 mb-2 uppercase tracking-wider font-semibold">Ваша номинация</p>
                 <p className="font-bold text-blue-700 text-xl">{nomination}</p>
             </div>
         </div>

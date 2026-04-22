@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Lightbulb, TrendingUp, Users, Target, Send, Loader2, AlertCircle, X, Plug2 } from 'lucide-react';
+import { Lightbulb, TrendingUp, Users, Target, Send, Loader2, AlertCircle, X, Plug2, Check } from 'lucide-react';
 import TextInput from '../components/TextInput';
 import NumberInput from '../components/NumberInput';
 import SearchableSelect from '../components/SearchableSelect';
@@ -142,6 +142,7 @@ const RegistrationPage: React.FC = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [apiError, setApiError] = useState<string | null>(null);
     const [registrationState, setRegistrationState] = useState<RegistrationState | null>(null);
+    const [justActivated, setJustActivated] = useState(false);
     
     // Auto-hide API Error
     useEffect(() => {
@@ -189,6 +190,7 @@ const RegistrationPage: React.FC = () => {
                         const updatedState = { ...registrationState, isActivated: true };
                         setRegistrationState(updatedState);
                         localStorage.setItem('ldpr_application_data', JSON.stringify(updatedState));
+                        setJustActivated(true);
                     }
                 }
             } catch (error) {
@@ -407,18 +409,6 @@ const RegistrationPage: React.FC = () => {
         }
     };
 
-    if (registrationState?.isActivated) {
-        // As a robust fallback, if registration state was saved BEFORE patronymic and gender were added to it,
-        // we can still fall back to formData to display the correct full name and greeting in SuccessPage.
-        return <SuccessPage 
-            surname={registrationState.surname || formData.lastName} 
-            name={registrationState.name || formData.firstName} 
-            patronymic={registrationState.patronymic || formData.patronymic}
-            gender={registrationState.gender || formData.gender}
-            nomination={registrationState.nomination || formData.nominationId} 
-        />;
-    }
-
     if (registrationState && !registrationState.isActivated) {
         return (
             <div className="min-h-[100dvh] bg-gradient-to-br from-[#11236B] via-[#0d1b54] to-[#081033] font-sans text-white p-4 sm:p-6 lg:p-8 flex flex-col items-center justify-center relative">
@@ -447,6 +437,18 @@ const RegistrationPage: React.FC = () => {
                     </div>
                 </div>
             </div>
+        );
+    }
+    
+    if (justActivated && registrationState) {
+        return (
+            <SuccessPage 
+                surname={registrationState.surname || formData.lastName}
+                name={registrationState.name || formData.firstName}
+                patronymic={registrationState.patronymic || formData.patronymic}
+                gender={registrationState.gender || formData.gender}
+                nomination={registrationState.nomination || formData.nominationId}
+            />
         );
     }
 
@@ -558,6 +560,34 @@ const RegistrationPage: React.FC = () => {
                     font-weight: 600;
                 }
                 
+                /* Exceptions for Success Block to render exactly like first screenshot */
+                .dark-theme-overrides .dark-theme-block-exception * {
+                    color: inherit !important;
+                    background-color: inherit !important;
+                }
+                .dark-theme-overrides .dark-theme-block-exception {
+                    color: #1e293b !important;
+                    background-color: white !important;
+                    border: none !important;
+                }
+                .dark-theme-overrides .dark-theme-block-exception h1 {
+                    color: #1e293b !important;
+                }
+                .dark-theme-overrides .dark-theme-block-exception .bg-green-500,
+                .dark-theme-overrides .dark-theme-block-exception .bg-green-500 * {
+                    background-color: #22c55e !important;
+                    color: white !important;
+                }
+                .dark-theme-overrides .dark-theme-block-exception .bg-slate-50,
+                .dark-theme-overrides .dark-theme-block-exception .bg-slate-50 * {
+                    background-color: #f8fafc !important;
+                }
+                .dark-theme-overrides .dark-theme-block-exception .text-slate-700 { color: #334155 !important; }
+                .dark-theme-overrides .dark-theme-block-exception .text-gray-900 { color: #111827 !important; }
+                .dark-theme-overrides .dark-theme-block-exception .text-slate-500 { color: #64748b !important; }
+                .dark-theme-overrides .dark-theme-block-exception .text-blue-700 { color: #1d4ed8 !important; }
+                .dark-theme-overrides .dark-theme-block-exception hr { border-top: 1px solid #e5e7eb !important; border-bottom: none !important; }
+
                 /* Custom Scrollbar for Region Dropdown */
                 .region-scrollbar::-webkit-scrollbar {
                     width: 6px;
@@ -676,12 +706,39 @@ const RegistrationPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* СЕКЦИЯ 5: Форма */}
+                {/* СЕКЦИЯ 5: Форма или Успех */}
                 <div className="mt-20 dark-theme-overrides border-t border-white/20 pt-16">
-                    <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">Оставить заявку на участие</h2>
-                    <p className="text-gray-200 text-lg md:text-xl font-medium mb-12">Время заполнения анкеты 10-15 минут. Желаем удачи! Вы все — большие молодцы. Нам есть чему у вас поучиться!</p>
-                    
-                    <form onSubmit={handleSubmit} className="space-y-12">
+                    {registrationState?.isActivated ? (
+                        <div id="success-block" className="animate-in fade-in slide-in-from-bottom-4 duration-700 bg-white px-4 py-10 md:p-12 rounded-[2rem] shadow-2xl text-center flex-1 sm:flex-none flex flex-col justify-center w-full max-w-2xl mx-auto dark-theme-block-exception mb-20">
+                            <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-sm">
+                                <Check className="h-12 w-12 text-white stroke-[3]" />
+                            </div>
+                            <h1 className="text-3xl sm:text-4xl font-extrabold text-[#111827] tracking-tight mb-8">
+                                Заявка успешно<br className="hidden sm:block" /> подтверждена!
+                            </h1>
+                            <div className="text-left mt-8 w-full max-w-md mx-auto sm:max-w-none">
+                                <p className="text-xl text-[#334155] leading-relaxed mb-6">
+                                    {(() => {
+                                        const g = registrationState.gender || formData.gender;
+                                        return g === 'Мужской' ? 'Уважаемый' : g === 'Женский' ? 'Уважаемая' : 'Уважаемый(ая)';
+                                    })()}{' '}
+                                    <span className="font-bold text-[#111827]">
+                                        {`${registrationState.surname || formData.lastName} ${registrationState.name || formData.firstName}${((registrationState.patronymic || formData.patronymic) ? ' ' + (registrationState.patronymic || formData.patronymic) : '')}`}
+                                    </span>, спасибо за участие!
+                                </p>
+                                <hr className="my-6 border-[#e5e7eb]" />
+                                <div>
+                                    <p className="text-sm text-[#64748b] mb-2 uppercase tracking-wider font-semibold">Ваша номинация</p>
+                                    <p className="font-bold text-[#1d4ed8] text-xl">{registrationState.nomination || formData.nominationId}</p>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">Оставить заявку на участие</h2>
+                            <p className="text-gray-200 text-lg md:text-xl font-medium mb-12">Время заполнения анкеты 10-15 минут. Желаем удачи! Вы все — большие молодцы. Нам есть чему у вас поучиться!</p>
+                            
+                            <form onSubmit={handleSubmit} className="space-y-12">
                         {/* Block 1: Основная информация */}
                         <div className="space-y-6">
                             <TextInput name="lastName" label="Фамилия" required value={formData.lastName} onChange={handleChange} onBlur={handleBlur} error={errors.lastName} format="capitalizeName" />
@@ -721,7 +778,7 @@ const RegistrationPage: React.FC = () => {
                         {/* Block 2: Выбор номинации */}
                         <div className="pt-8 border-t border-white/20">
                             <h2 className="text-2xl font-bold text-white mb-2">Выбор номинации <span className="text-red-500">*</span></h2>
-                            <p className="text-base text-gray-300 mb-8">Если вы хотите принять участие в нескольких номинациях, нужно заполнить анкету на каждую номинацию отдельно.</p>
+                            <p className="text-base text-gray-300 mb-8">Принять участие можно только в одной номинации</p>
                             <NominationCards name="nominationId" options={NOMINATIONS_LIST} value={formData.nominationId} onChange={handleChange} error={errors.nominationId} />
                         </div>
 
@@ -856,6 +913,8 @@ const RegistrationPage: React.FC = () => {
                             </div>
                         </div>
                     </form>
+                    </>
+                    )}
                 </div>
             </div>
         </div>

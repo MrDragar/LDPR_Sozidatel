@@ -50,6 +50,7 @@ const NumberInput: React.FC<NumberInputProps> = ({ label, name, id, error, requi
                 value={value}
                 onChange={handleChange}
                 onBlur={handleBlur}
+                maxLength={props.maxLength || 100}
                 {...props}
             />
             {error && <p className="mt-2 text-sm text-red-600">{error}</p>}

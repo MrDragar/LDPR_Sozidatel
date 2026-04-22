@@ -119,6 +119,7 @@ const TextInput: React.FC<TextInputProps> = ({ label, description, name, id, err
         required,
         onChange: handleChange,
         onBlur: handleBlur,
+        maxLength: props.maxLength || ((type === 'textarea' || multiline) ? 50000 : 100),
         ...props,
     };
 
