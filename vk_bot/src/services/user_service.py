@@ -58,7 +58,7 @@ class UserService(IUserService):
                 raise BadUserIsActivatedError()
                 
             await self.__user_repo.set_telegram_id_and_username(
-                user_id, telegram_id, username
+                user_id, telegram_id, username, self.source
             )
             user.telegram_id = telegram_id
             user.username = username
