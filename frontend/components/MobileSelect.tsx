@@ -87,26 +87,21 @@ const MobileSelect: React.FC<MobileSelectProps> = ({ isOpen, onClose, options, s
 
             <ul 
                 ref={listRef} 
-                className="flex-grow overflow-y-auto p-2"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                className="flex-grow overflow-y-auto p-2 region-scrollbar pb-1"
             >
-                {/* Add a global style tag strictly for webkit-scrollbar hiding on this specific component instance if needed, or rely on scrollbarWidth */}
-                <style dangerouslySetInnerHTML={{__html: `
-                    ul::-webkit-scrollbar {
-                        display: none;
-                    }
-                `}} />
                 {filteredOptions.length > 0 ? (
                     filteredOptions.map(option => (
                         <li key={option}>
                             <button
                                 onClick={() => handleSelect(option)}
-                                className="w-full flex items-center justify-between text-left px-4 py-3.5 rounded-lg text-white hover:bg-white/10"
+                                className={`w-full flex items-center justify-between text-left px-4 py-3.5 rounded-lg transition-colors ${
+                                    selectedOption === option ? 'selected bg-blue-600 text-white' : 'text-white hover:bg-white/10'
+                                }`}
                                 role="option"
                                 aria-selected={selectedOption === option}
                             >
                                 <span className="text-base">{option}</span>
-                                {selectedOption === option && <Check className="h-5 w-5 text-orange-500" />}
+                                {selectedOption === option && <Check className="h-5 w-5 text-white" />}
                             </button>
                         </li>
                     ))

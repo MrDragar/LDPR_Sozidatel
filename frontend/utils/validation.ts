@@ -47,7 +47,7 @@ export const validateField = (name: string, allData: Record<string, any>): strin
             if (!value) return 'Поле обязательно';
             return EMAIL_REGEX.test(value as string) ? undefined : 'Неверный формат email';
         case 'website':
-            if (!value) return 'Поле обязательно';
+            if (!value) return undefined;
             return URL_REGEX.test(value as string) ? undefined : 'Неверный формат ссылки. Пример: https://example.com';
         case 'phone':
             if (!value) return 'Поле обязательно';

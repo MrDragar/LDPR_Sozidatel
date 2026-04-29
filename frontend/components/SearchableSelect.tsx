@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 // FIX: Changed import from 'react-dom/client' to 'react-dom' to correctly use createPortal.
 import ReactDOM from 'react-dom';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Check } from 'lucide-react';
 import MobileSelect from './MobileSelect';
 
 interface SearchableSelectProps {
@@ -102,7 +102,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({ label, name, id, op
                     id={id || name}
                     type="button"
                     onClick={() => setIsOpen(true)}
-                    className={`w-full px-4 py-3 text-left bg-white border rounded-md flex justify-between items-center text-base
+                    className={`w-full px-4 py-3 text-left bg-white border rounded-md flex justify-between items-center text-base cursor-pointer
                     focus-visible:outline-none focus-visible:ring-2 ${error ? 'border-red-500 focus-visible:ring-red-500' : 'border-gray-300 focus-visible:ring-blue-500 focus-visible:border-blue-500'}`}
                 >
                     <span className={selected ? 'text-gray-900' : 'text-gray-500'}>
@@ -138,7 +138,7 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({ label, name, id, op
                     id={id || name}
                     type="button"
                     onClick={handleToggle}
-                    className={`w-full px-4 py-3 text-left bg-white border rounded-md flex justify-between items-center text-base
+                    className={`w-full px-4 py-3 text-left bg-white border rounded-md flex justify-between items-center text-base cursor-pointer
                     focus-visible:outline-none focus-visible:ring-2 ${error ? 'border-red-500 focus-visible:ring-red-500' : 'border-gray-300 focus-visible:ring-blue-500 focus-visible:border-blue-500'}`}
                 >
                     <span className={selected ? 'text-gray-900' : 'text-gray-500'}>
@@ -163,9 +163,10 @@ const SearchableSelect: React.FC<SearchableSelectProps> = ({ label, name, id, op
                                 <li
                                     key={option}
                                     onClick={() => handleSelect(option)}
-                                    className={`px-4 py-2 cursor-pointer text-gray-900 ${selected === option ? 'selected' : 'hover:bg-blue-100'}`}
+                                    className={`px-4 py-2 cursor-pointer transition-colors flex items-center justify-between ${selected === option ? 'selected bg-blue-600 text-white' : 'text-gray-900 hover:bg-blue-100'}`}
                                 >
-                                    {option}
+                                    <span>{option}</span>
+                                    {selected === option && <Check className="h-5 w-5 shrink-0" />}
                                 </li>
                             )) : <li className="px-4 py-2 text-gray-500">Не найдено</li>}
                         </ul>

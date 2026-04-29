@@ -1,15 +1,20 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Lightbulb, TrendingUp, Users, Target, Send, Loader2, AlertCircle, X, Plug2, Check } from 'lucide-react';
+import { Lightbulb, TrendingUp, Users, Target, Send, Loader2, AlertCircle, X, Plug2, Check, Shield, Globe, Users2, HeartHandshake, LineChart, Trash2 } from 'lucide-react';
 import TextInput from '../components/TextInput';
 import NumberInput from '../components/NumberInput';
 import SearchableSelect from '../components/SearchableSelect';
+import Select from '../components/Select';
+import FileUpload from '../components/FileUpload';
+import NominationSelect from '../components/NominationSelect';
 import RadioGroup from '../components/RadioGroup';
 import BooleanToggle from '../components/BooleanToggle';
 import NominationCards from '../components/NominationCards';
-import { REGIONS, NOMINATIONS_LIST } from '../constants';
+import ClearFormModal from '../components/ClearFormModal';
+import { REGIONS, NOMINATIONS_LIST, SPHERES } from '../constants';
 import { validateField } from '../utils/validation';
 import type { FormData } from '../types';
 
+import QRCode from 'react-qr-code';
 import SuccessPage from './SuccessPage';
 
 const INITIAL_DATA: FormData = {
@@ -44,7 +49,7 @@ const DYNAMIC_QUESTIONS: Record<string, string[]> = {
     importozameschenie: [
         "Какой конкретно зарубежный продукт, технологию или компонент вы замещаете своим решением? Укажите страну производителя и название замещаемого аналога (если это публичная информация). Почему потребители выбирают вас вместо импорта?",
         "Каков реальный уровень локализации вашего продукта в процентах от себестоимости или по ключевым компонентам? Что именно в вашем изделии пока остаётся импортным, и есть ли план по его замещению в ближайшие 1-2 года?",
-        "Были ли случаи, когда благодаря вам предприятия избежали остановки производства из-за санкций или разрыва логистических цепочек? Есть ли примеры, когда заказчики после тестирования вашего решения полностью отказались от импорта в вашу пользу?"
+        "Были ли случаи, когда благодаря вам предприятия избежали остановки производства из-за санкций или разрыва логистических цепочек? Есть ли примеры, когда заказчики после тестирования вашего решения полностью отказались от импорта в вашу пользу? (необязательно)"
     ],
     rost: [
         "Что именно произошло за последние несколько лет: вы запустили в серию принципиально новую продукцию или расширили физические возможности производства (новые цеха, линии, склады)? Опишите конкретно — что именно, где и когда было запущено или построено.",
@@ -59,29 +64,18 @@ const DYNAMIC_QUESTIONS: Record<string, string[]> = {
     capital: [
         "Какие программы материальной поддержки, выходящие за рамки обычной зарплаты и предусмотренных ТК РФ выплат, действуют на предприятии?",
         "Как компания помогает сотрудникам с детьми, а также заботится о здоровье коллектива?",
-        "Есть ли на предприятии практики, направленные на снижение текучести кадров и создание «своей» атмосферы?"
+        "Есть ли на предприятии практики, направленные на снижение текучести кадров и создание «своей» атмосферы? (необязательно)"
     ],
     svoih: [
-        "Какие конкретные меры поддержки получают сотрудники, призванные в рамках частичной мобилизации или ушедшие добровольцами на СВО, а также их семьи?",
-        "Принимаете ли вы на работу ветеранов боевых действий, вернувшихся со СВО? Если да, то сколько человек трудоустроено за последние 1-2 года и какие условия созданы для их адаптации?",
-        "Участвует ли предприятие в сборе и отправке гуманитарной помощи в зону СВО или приграничные регионы? Расскажите об этой деятельности."
+        "Участвует ли предприятие в сборе и отправке гуманитарной помощи в зону СВО или приграничные регионы? Расскажите об этой деятельности.",
+        "Какие конкретные меры поддержки получают сотрудники, призванные в рамках частичной мобилизации или ушедшие добровольцами на СВО, а также их семьи? (необязательно)",
+        "Принимаете ли вы на работу ветеранов боевых действий, вернувшихся со СВО? Если да, то сколько человек трудоустроено за последние 1-2 года и какие условия созданы для их адаптации? (необязательно)"
     ]
 };
 
 const VELICHIE_OPTIONS = [
     "Предложения / проекты по развитию экономики своего региона / города / села",
     "Предложения и законопроекты в экономическую Программу ЛДПР"
-];
-
-const VELICHIE_SPHERES = [
-    "Развитие производства",
-    "Транспорт и развитие дорожной инфраструктуры",
-    "Строительная отрасль",
-    "Агропромышленный комплекс",
-    "Поддержка сельской торговли",
-    "IT-индустрия",
-    "Креативные индустрии",
-    "Телекоммуникации"
 ];
 
 const formatPhone = (val: string) => {
@@ -114,7 +108,8 @@ const formatPhone = (val: string) => {
 
 interface RegistrationState {
     id: string;
-    link: string;
+    tg_link?: string;
+    vk_link?: string;
     isActivated: boolean;
     surname: string;
     name: string;
@@ -143,6 +138,7 @@ const RegistrationPage: React.FC = () => {
     const [apiError, setApiError] = useState<string | null>(null);
     const [registrationState, setRegistrationState] = useState<RegistrationState | null>(null);
     const [justActivated, setJustActivated] = useState(false);
+    const [showClearModal, setShowClearModal] = useState(false);
     
     // Auto-hide API Error
     useEffect(() => {
@@ -248,15 +244,21 @@ const RegistrationPage: React.FC = () => {
         setErrors(prev => ({ ...prev, [name]: error || '' }));
     }, [formData]);
 
+    const handleClearForm = useCallback(() => {
+        setFormData(INITIAL_DATA);
+        setErrors({});
+        localStorage.removeItem('ldpr_form_data');
+    }, []);
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         
         const newErrors: Record<string, string> = {};
         const fieldsToValidate = [
             'lastName', 'firstName', 'patronymic', 'gender', 'birthDate', 'phone', 'email', 'city', 'region',
+            'organization', 'industry', 'ogrn', 
             'isMember', 'newsSubscription',
-            'organization', 'industry', 
-            'ogrn', 'website', 'nominationId', 
+            'nominationId', 
             'agreement1', 'agreement2'
         ];
 
@@ -278,7 +280,14 @@ const RegistrationPage: React.FC = () => {
                 fieldsToValidate.push('velichieProposal');
             }
         } else if (formData.nominationId && DYNAMIC_QUESTIONS[formData.nominationId]) {
-            fieldsToValidate.push('dynamic0', 'dynamic1', 'dynamic2');
+            fieldsToValidate.push('dynamic0');
+            
+            if (formData.nominationId !== 'svoih') {
+                fieldsToValidate.push('dynamic1');
+            }
+            if (!['importozameschenie', 'capital', 'svoih'].includes(formData.nominationId)) {
+                fieldsToValidate.push('dynamic2');
+            }
         }
 
         let hasError = false;
@@ -390,7 +399,8 @@ const RegistrationPage: React.FC = () => {
             
             const newState: RegistrationState = {
                 id: data.id,
-                link: data.link,
+                tg_link: data.tg_link,
+                vk_link: data.vk_link,
                 isActivated: false,
                 surname: payload.surname,
                 name: payload.name,
@@ -412,28 +422,57 @@ const RegistrationPage: React.FC = () => {
     if (registrationState && !registrationState.isActivated) {
         return (
             <div className="min-h-[100dvh] bg-gradient-to-br from-[#11236B] via-[#0d1b54] to-[#081033] font-sans text-white p-4 sm:p-6 lg:p-8 flex flex-col items-center justify-center relative">
-                <div className="max-w-xl w-full bg-transparent sm:bg-white/5 border border-transparent sm:border-white/10 p-4 sm:p-12 rounded-3xl sm:shadow-2xl text-center backdrop-blur-sm">
-                    <div className="h-24 w-24 bg-[#11236B] shadow-inner rounded-full flex items-center justify-center mx-auto mb-8 text-white border-2 border-white/20">
-                        <Plug2 className="h-10 w-10 flex-shrink-0" />
-                    </div>
+                <div className="max-w-3xl w-full bg-transparent sm:bg-white/5 border border-transparent sm:border-white/10 p-4 sm:p-12 rounded-3xl sm:shadow-2xl text-center backdrop-blur-sm">
                     <h2 className="text-3xl font-extrabold text-white mb-6 font-sans">Подтвердите участие</h2>
-                    <p className="text-lg text-gray-300 mb-10 leading-relaxed font-sans">
-                        Мы получили вашу анкету. Для завершения регистрации, пожалуйста, перейдите в наш Telegram-бот и подтвердите заявку.
+                    <p className="text-lg text-gray-300 mb-10 leading-relaxed font-sans max-w-xl mx-auto">
+                        Мы получили вашу анкету. Для завершения регистрации отсканируйте <strong>QR-код</strong> с мобильного устройства или нажмите на кнопку для перехода к боту в нужной соцсети.
                     </p>
-                    <div className="flex flex-col gap-4 mt-8">
-                        <a 
-                            href={registrationState.link} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="w-full inline-flex items-center justify-center bg-[#0088cc] text-white px-8 py-4 rounded-xl text-lg font-bold hover:bg-[#0077b5] transition shadow-lg hover:shadow-xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-500/30"
-                        >
-                            Перейти в Telegram
-                        </a>
+                    
+                    <div className="flex flex-col md:flex-row gap-8 justify-center items-stretch mt-8 w-full mx-auto">
+                        {registrationState.tg_link && (
+                            <div className="flex flex-col items-center flex-1 max-w-sm mx-auto w-full gap-5">
+                                <div className="hidden md:block p-4 bg-white rounded-2xl shadow-lg ring-1 ring-white/10">
+                                    <QRCode value={registrationState.tg_link} size={160} />
+                                </div>
+                                <a 
+                                    href={registrationState.tg_link} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="w-full inline-flex items-center justify-center bg-[#0088cc] text-white px-6 py-4 rounded-xl text-lg font-bold hover:bg-[#0077b5] transition-colors shadow-lg"
+                                >
+                                    Перейти в Telegram
+                                </a>
+                            </div>
+                        )}
+                        
+                        {registrationState.tg_link && registrationState.vk_link && (
+                            <div className="flex md:flex-col items-center justify-center w-full md:w-auto gap-4 my-2 md:my-0 h-auto">
+                                <div className="flex-1 md:flex-none md:w-px h-px md:h-20 bg-white/10"></div>
+                                <span className="text-white/50 text-sm font-medium uppercase tracking-widest shrink-0">или</span>
+                                <div className="flex-1 md:flex-none md:w-px h-px md:h-20 bg-white/10"></div>
+                            </div>
+                        )}
+                        
+                        {registrationState.vk_link && (
+                            <div className="flex flex-col items-center flex-1 max-w-sm mx-auto w-full gap-5">
+                                <div className="hidden md:block p-4 bg-white rounded-2xl shadow-lg ring-1 ring-white/10">
+                                    <QRCode value={registrationState.vk_link} size={160} />
+                                </div>
+                                <a 
+                                    href={registrationState.vk_link} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="w-full inline-flex items-center justify-center bg-[#0077FF] text-white px-6 py-4 rounded-xl text-lg font-bold hover:bg-[#005fb8] transition-colors shadow-lg"
+                                >
+                                    Перейти ВКонтакте
+                                </a>
+                            </div>
+                        )}
                     </div>
                     
-                    <div className="mt-10 pt-8 border-t border-white/10 flex items-start justify-center text-gray-400 gap-3 text-left">
-                        <Loader2 className="h-5 w-5 animate-spin shrink-0 mt-0.5" />
-                        <span className="font-medium text-base">Ожидаем подтверждение...</span>
+                    <div className="mt-14 pt-8 border-t border-white/10 flex items-center justify-center text-gray-400 gap-3">
+                        <Loader2 className="h-6 w-6 animate-spin shrink-0" />
+                        <span className="font-medium text-lg">Ожидаем подтверждение...</span>
                     </div>
                 </div>
             </div>
@@ -555,7 +594,7 @@ const RegistrationPage: React.FC = () => {
                     background-color: rgba(255, 255, 255, 0.1) !important;
                 }
                 .dark-theme-overrides .searchable-dropdown-pc li.selected {
-                    background-color: rgba(255, 255, 255, 0.15) !important;
+                    background-color: #2563eb !important;
                     color: white !important;
                     font-weight: 600;
                 }
@@ -608,7 +647,7 @@ const RegistrationPage: React.FC = () => {
             {/* СЕКЦИЯ 1: Hero-блок (Картинка на 100% ширины) */}
             <div className="w-full mb-10 md:mb-14 shadow-2xl">
                 <img 
-                    src="https://psv4.userapi.com/s/v1/d2/NhL__mhu0R8cGXj_TGsThHuhacoSEH_FUwC_6E-R4o5raIPz1CzYfsA0-xhBczDNNI1h57X5_9Yu4Urz7rrl4Pw3pO6PY6FhfpGDFj4QDkCvyJPRjlxNFXszGJIHwQ7QAe7hxD1iQSt6/photo_5208576917001855022_y.jpg" 
+                    src="https://psv4.userapi.com/s/v1/d2/MBv1LLJbuz-96_02um5StNpDsOUe8VFekXtJXz2yikDfJtE7VAd5WQTLGIK9oHnkouJyVvtk6d8M1U6IwtPmkrCPOK7tP6FlykGEa_wRt1B4bR-PsSC-itutFZ6qeb2ej5YjR6WMfEYS/photo_5208576917001855022_y_1.jpg" 
                     alt="Премия Созидатель" 
                     className="w-full h-auto md:aspect-[21/9] md:object-cover block"
                     referrerPolicy="no-referrer"
@@ -632,59 +671,74 @@ const RegistrationPage: React.FC = () => {
                     III Всероссийская национальная премия за вклад в развитие экономики.
                 </h2>
                 
-                {/* СЕКЦИЯ 3: Объединенный белый блок "Цель" и "Приоритеты" */}
-                <div className="bg-white text-[#11236B] rounded-[2rem] p-8 md:p-12 mb-16 shadow-xl">
-                    <div>
-                        <h3 className="text-3xl md:text-4xl font-extrabold mb-4 text-[#11236B]">Цель премии</h3>
-                        <p className="text-[#11236B] text-lg md:text-xl leading-relaxed">
-                            Выявление и поддержка российских предпринимателей, которые вкладываются в развитие технологий и инновации, демонстрируют экономические достижения и придерживаются высоких стандартов управления.
+                {/* СЕКЦИЯ 3: Описание премии */}
+                <div className="space-y-8 mb-16">
+                    <div className="bg-white text-[#11236B] rounded-[2rem] p-8 md:p-12 shadow-xl">
+                        <h3 className="text-3xl md:text-3xl font-extrabold mb-4 text-[#11236B]">
+                            ЛДПР даёт старт IV Всероссийской национальной премии за вклад в развитие экономики «Созидатель»!
+                        </h3>
+                        <p className="text-[#11236B] text-lg md:text-xl leading-relaxed mb-4">
+                            Этот проект объединяет тех, кто своим трудом определяет будущее страны: внедряет инновации, создаёт новые продукты и сервисы, оказывает услуги и помогает людям, вносит вклад в достижение технологического лидерства.
+                        </p>
+                        <p className="text-[#11236B] text-lg md:text-xl leading-relaxed font-semibold">
+                            Производить и созидать в России можно и нужно. Участники премии «Созидатель» доказывают это каждый год.
                         </p>
                     </div>
 
-                    <hr className="border-gray-300 my-10 border-t-2" />
+                    <div className="bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-[2rem] p-8 md:p-12 shadow-xl">
+                        <h3 className="text-2xl md:text-3xl font-extrabold mb-4">Кто может стать обладателем премии?</h3>
+                        <p className="text-lg md:text-xl leading-relaxed mb-4">
+                            Любые организации, которые занимаются производством продукции, оказанием услуг или разработкой технологий.
+                        </p>
+                        <p className="text-lg md:text-xl leading-relaxed">
+                            При этом любой гражданин может выдвинуть предпринимателя или ту или иную компанию для рассмотрения на получение премии.
+                        </p>
+                    </div>
 
-                    <div>
-                        <h3 className="text-3xl md:text-4xl font-extrabold mb-4 text-[#11236B]">
-                            Приоритеты
-                        </h3>
-                        <p className="text-xl md:text-2xl font-medium mb-10 text-[#11236B]">
-                            Заявителям необходимо рассказать о своей продукции и компании следующее:
+                    <div className="bg-white text-[#11236B] rounded-[2rem] p-8 md:p-12 shadow-xl">
+                        <p className="text-lg md:text-xl leading-relaxed mb-8">
+                            Для выдвижения на премию «Созидатель» достаточно представить свои предложения по экономическому развитию страны, а также поддержке предпринимателей в рамках номинации <strong>«Вернём величие России!»</strong>, либо представить описание вашей работы / предприятия в рамках одной из шести других номинаций:
                         </p>
                         
                         <div className="flex flex-col">
-                            <div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-5 border-b border-gray-200 pb-8 mb-8">
-                                <div className="shrink-0 w-14 h-14 bg-[#11236B] rounded-2xl flex items-center justify-center text-white shadow-md">
-                                    <Lightbulb size={28} strokeWidth={2} />
-                                </div>
-                                <div className="mt-1 md:mt-0">
-                                    <h4 className="text-xl md:text-2xl font-bold mb-2 text-[#11236B]">Технологии</h4>
-                                    <p className="text-[#11236B] text-lg leading-relaxed">
-                                        Технологические особенности продукта, его новизна, технологический эффект от использования, объёмы исследовательских работ в компании.
-                                    </p>
-                                </div>
+                            <div className="flex items-start gap-4 py-4 border-b border-gray-200">
+                                <Lightbulb className="h-6 w-6 text-[#11236B] shrink-0 mt-0.5" />
+                                <span className="text-xl font-medium">Технологический прорыв</span>
                             </div>
-
-                            <div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-5 border-b border-gray-200 pb-8 mb-8">
-                                <div className="shrink-0 w-14 h-14 bg-[#11236B] rounded-2xl flex items-center justify-center text-white shadow-md">
-                                    <TrendingUp size={28} strokeWidth={2} />
-                                </div>
-                                <div className="mt-1 md:mt-0">
-                                    <h4 className="text-xl md:text-2xl font-bold mb-2 text-[#11236B]">Экономика</h4>
-                                    <p className="text-[#11236B] text-lg leading-relaxed">
-                                        Экономические достижения за 3 года, выход на новые рынки, повышение производительности, получение патентов и лицензий.
-                                    </p>
-                                </div>
+                            <div className="flex items-start gap-4 py-4 border-b border-gray-200">
+                                <Shield className="h-6 w-6 text-[#11236B] shrink-0 mt-0.5" />
+                                <span className="text-xl font-medium">Импортонезависимость</span>
                             </div>
+                            <div className="flex items-start gap-4 py-4 border-b border-gray-200">
+                                <LineChart className="h-6 w-6 text-[#11236B] shrink-0 mt-0.5" />
+                                <span className="text-xl font-medium">Производственный рост</span>
+                            </div>
+                            <div className="flex items-start gap-4 py-4 border-b border-gray-200">
+                                <Globe className="h-6 w-6 text-[#11236B] shrink-0 mt-0.5" />
+                                <span className="text-xl font-medium">Экспортные рынки</span>
+                            </div>
+                            <div className="flex items-start gap-4 py-4 border-b border-gray-200">
+                                <Users2 className="h-6 w-6 text-[#11236B] shrink-0 mt-0.5" />
+                                <span className="text-xl font-medium">Человеческий капитал и управление</span>
+                            </div>
+                            <div className="flex items-start gap-4 py-4">
+                                <HeartHandshake className="h-6 w-6 text-[#11236B] shrink-0 mt-0.5" />
+                                <span className="text-xl font-medium">Плечом к плечу. Своих не бросаем</span>
+                            </div>
+                        </div>
 
-                            <div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-5">
-                                <div className="shrink-0 w-14 h-14 bg-[#11236B] rounded-2xl flex items-center justify-center text-white shadow-md">
-                                    <Users size={28} strokeWidth={2} />
+                        <hr className="border-gray-300 my-8" />
+                        
+                        <div>
+                            <p className="text-sm uppercase tracking-wider text-gray-500 font-bold mb-4">Обязательные условия</p>
+                            <div className="flex flex-col gap-3">
+                                <div className="flex items-start gap-3">
+                                    <Check className="h-5 w-5 text-[#11236B] shrink-0 mt-0.5" />
+                                    <span className="text-sm md:text-base text-gray-700 font-medium">регистрация ИП или коммерческой организации на территории РФ не позднее 1 июля 2025 года;</span>
                                 </div>
-                                <div className="mt-1 md:mt-0">
-                                    <h4 className="text-xl md:text-2xl font-bold mb-2 text-[#11236B]">Управление</h4>
-                                    <p className="text-[#11236B] text-lg leading-relaxed">
-                                        Стандарты управления, развитие деловой репутации, вклад в человеческий потенциал, корпоративная культура и ответственность.
-                                    </p>
+                                <div className="flex items-start gap-3">
+                                    <Check className="h-5 w-5 text-[#11236B] shrink-0 mt-0.5" />
+                                    <span className="text-sm md:text-base text-gray-700 font-medium">учредители — только российские физические или юридические лица.</span>
                                 </div>
                             </div>
                         </div>
@@ -694,14 +748,14 @@ const RegistrationPage: React.FC = () => {
                 {/* СЕКЦИЯ 4: Галерея / Призыв */}
                 <div className="mb-20 relative mix-blend-normal">
                     <img 
-                        src="https://psv4.userapi.com/s/v1/d2/LfrWySc4mVAIumBB6avwt6WdIoVCqkb3m8dkU1HGQ218iwAnp15aA5et1gvrSXf8GelPC6VgZUSVGDFSYTkxB-v3Qh_FExEnRNzdDdrzVZqbWLSzcj1A7m_by3s3e_aNFe2S229btYPi/photo_5208576917001855031_y.jpg" 
+                        src="https://psv4.userapi.com/s/v1/d2/vds788UdC9ODMffQcEpPe9iaC7e0zMaxYUNQ4Y7AxZU1kNQ7B3E4FYRobU_cgQlpbDbVbPC862EsxGy0vYrImOymT4hVuoXD8Gg1mG7ZjhjIaqUtpPyHbPD41h4o5BtbQ2_nQ-BuxbLW/image_2.jpg" 
                         alt="Совет предпринимателей" 
                         className="w-full aspect-[4/3] md:aspect-video rounded-3xl object-cover shadow-2xl mb-8 relative z-10 block"
                         referrerPolicy="no-referrer"
                     />
                     <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 md:p-8 shadow-xl relative z-10 w-full overflow-hidden block">
-                        <p className="text-lg md:text-xl leading-relaxed text-white font-medium break-words text-center md:text-left">
-                            Заявителей, номинантов и лауреатов Премии приглашаем к участию в Совете предпринимателей при фракции ЛДПР в Государственной Думе для внесения предложений в законодательную повестку.
+                        <p className="text-lg md:text-xl leading-relaxed text-white font-medium break-words text-left">
+                            Лучшие инициативы будут внесены на рассмотрение в виде законопроектов в Государственную Думу Российской Федерации и нормотворческих предложений в Правительство России. Лауреаты премии смогут принять участие в работе Экономического совета ЛДПР в Государственной Думе.
                         </p>
                     </div>
                 </div>
@@ -735,8 +789,10 @@ const RegistrationPage: React.FC = () => {
                         </div>
                     ) : (
                         <>
-                            <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">Оставить заявку на участие</h2>
-                            <p className="text-gray-200 text-lg md:text-xl font-medium mb-12">Время заполнения анкеты 10-15 минут. Желаем удачи! Вы все — большие молодцы. Нам есть чему у вас поучиться!</p>
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+                                <h2 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight">Оставить заявку на участие</h2>
+                            </div>
+                            <p className="text-gray-200 text-lg md:text-xl font-medium mb-12">Заполнить анкету просто — это займёт не больше 10 минут. Не упустите шанс заявить о себе на всю страну!</p>
                             
                             <form onSubmit={handleSubmit} className="space-y-12">
                         {/* Block 1: Основная информация */}
@@ -755,10 +811,22 @@ const RegistrationPage: React.FC = () => {
                             <SearchableSelect name="region" label="Регион" options={REGIONS} required selected={formData.region} onChange={handleChange} onBlur={handleBlur} error={errors.region} />
                             <TextInput name="city" label="Город / Населённый пункт" description="Укажите ваш город или населённый пункт" required value={formData.city} onChange={handleChange} onBlur={handleBlur} error={errors.city} />
 
+                            <TextInput name="organization" label="Организация и должность" required value={formData.organization} onChange={handleChange} onBlur={handleBlur} error={errors.organization} />
+                            <Select name="industry" label="Сфера деятельности" options={SPHERES} required selected={formData.industry} onChange={handleChange} onBlur={handleBlur} error={errors.industry} />
+                            <NumberInput name="ogrn" label="ОГРН / ОГРНИП" required value={formData.ogrn} onChange={handleChange} onBlur={handleBlur} error={errors.ogrn} />
+                            <TextInput name="website" type="url" label="Сайт" placeholder="https://example.com" value={formData.website} onChange={handleChange} onBlur={handleBlur} error={errors.website} />
+
                             <BooleanToggle name="isMember" label="Вы являетесь членом ЛДПР?" required value={formData.isMember} onChange={handleChange} error={errors.isMember} />
                             
                             {formData.isMember === false && (
-                                <BooleanToggle name="wishToJoin" label="Хотите ли Вы присоединиться к команде ЛДПР?" required value={formData.wishToJoin} onChange={handleChange} error={errors.wishToJoin} />
+                                <div className="space-y-3">
+                                    <BooleanToggle name="wishToJoin" label="Хотите ли Вы присоединиться к команде ЛДПР?" required value={formData.wishToJoin} onChange={handleChange} error={errors.wishToJoin} />
+                                    {formData.wishToJoin === true && (
+                                        <div className="bg-blue-600/20 p-4 rounded-xl border border-blue-400 text-white animate-in slide-in-from-top-2">
+                                            Большое спасибо! Мы свяжемся с Вами и подскажем, как вступить в наши ряды!
+                                        </div>
+                                    )}
+                                </div>
                             )}
 
                             {(formData.isMember === true || formData.wishToJoin === true) && (
@@ -767,19 +835,24 @@ const RegistrationPage: React.FC = () => {
                                 </div>
                             )}
 
-                            <BooleanToggle name="newsSubscription" label="Хотели бы вы получать информацию о инициативах и мероприятиях ЛДПР?" required value={formData.newsSubscription} onChange={handleChange} error={errors.newsSubscription} />
-
-                            <TextInput name="organization" label="Организация и должность" required value={formData.organization} onChange={handleChange} onBlur={handleBlur} error={errors.organization} />
-                            <TextInput name="industry" label="Сфера деятельности" required value={formData.industry} onChange={handleChange} onBlur={handleBlur} error={errors.industry} />
-                            <NumberInput name="ogrn" label="ОГРН / ОГРНИП" required value={formData.ogrn} onChange={handleChange} onBlur={handleBlur} error={errors.ogrn} />
-                            <TextInput name="website" type="url" label="Сайт" placeholder="https://example.com" required value={formData.website} onChange={handleChange} onBlur={handleBlur} error={errors.website} />
+                            <div className="space-y-3">
+                                <BooleanToggle name="newsSubscription" label="Хотели бы вы получать информацию о инициативах и мероприятиях ЛДПР?" required value={formData.newsSubscription} onChange={handleChange} error={errors.newsSubscription} />
+                                {formData.newsSubscription === true && (
+                                    <div className="bg-blue-600/20 p-4 rounded-xl border border-blue-400 text-white animate-in slide-in-from-top-2">
+                                        <p className="mb-2">Отлично! Подписывайтесь на наш Telegram-бот для получения новостей.</p>
+                                        <a href="https://t.me/Sozidatel_LDPR_bot" target="_blank" rel="noopener noreferrer" className="inline-flex font-bold text-blue-300 hover:text-blue-200 underline">
+                                            Перейти в Telegram-бот
+                                        </a>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Block 2: Выбор номинации */}
                         <div className="pt-8 border-t border-white/20">
                             <h2 className="text-2xl font-bold text-white mb-2">Выбор номинации <span className="text-red-500">*</span></h2>
                             <p className="text-base text-gray-300 mb-8">Принять участие можно только в одной номинации</p>
-                            <NominationCards name="nominationId" options={NOMINATIONS_LIST} value={formData.nominationId} onChange={handleChange} error={errors.nominationId} />
+                            <NominationSelect name="nominationId" label="Номинация" options={NOMINATIONS_LIST} selected={formData.nominationId} onChange={handleChange} error={errors.nominationId} required />
                         </div>
 
                         {/* Block 3: Детали проекта (Динамический блок) */}
@@ -801,10 +874,10 @@ const RegistrationPage: React.FC = () => {
 
                                         {formData.velichieChoice === VELICHIE_OPTIONS[1] && (
                                             <div className="animate-in fade-in slide-in-from-top-4 duration-300">
-                                                <RadioGroup
+                                                <Select
                                                     name="velichieSphere"
                                                     label="Развития какой из перечисленных сфер касаются ваши предложения?"
-                                                    options={VELICHIE_SPHERES}
+                                                    options={SPHERES}
                                                     selected={formData.velichieSphere || ''}
                                                     onChange={handleChange}
                                                     required
@@ -833,13 +906,14 @@ const RegistrationPage: React.FC = () => {
                                     <div className="space-y-6">
                                         {DYNAMIC_QUESTIONS[formData.nominationId]?.map((question, idx) => {
                                             const key = `dynamic${idx}` as keyof FormData;
+                                            const isOptional = question.includes('(необязательно)');
                                             return (
                                                 <TextInput
                                                     key={key}
                                                     name={key}
-                                                    label={question}
+                                                    label={question.replace('(необязательно)', '').trim()}
                                                     multiline
-                                                    required
+                                                    required={!isOptional}
                                                     value={formData[key] || ''}
                                                     onChange={handleChange}
                                                     onBlur={handleBlur}
@@ -849,6 +923,7 @@ const RegistrationPage: React.FC = () => {
                                         })}
                                     </div>
                                 )}
+
                             </div>
                         )}
 
@@ -867,7 +942,7 @@ const RegistrationPage: React.FC = () => {
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-base text-gray-200 leading-snug">
-                                            Отправляя заявку на участие в премии, я выражаю готовность документально подтвердить предоставленную в форме заявки информацию. <span className="text-red-500">*</span>
+                                            Отправляя заявку на участие в премии, я выражаю готовность подтвердить предоставленную в форме заявки информацию. <span className="text-red-500">*</span>
                                         </span>
                                         {errors.agreement1 && <p className="mt-1 text-sm text-red-600">{errors.agreement1}</p>}
                                     </div>
@@ -917,6 +992,11 @@ const RegistrationPage: React.FC = () => {
                     )}
                 </div>
             </div>
+            <ClearFormModal 
+                isOpen={showClearModal}
+                onClose={() => setShowClearModal(false)}
+                onConfirm={handleClearForm}
+            />
         </div>
     );
 };
