@@ -24,3 +24,4 @@ class Container(DeclarativeContainer):
     )
     log_chat: providers.Object[str] = providers.Object(config.log_chat)
     admin_ids: providers.Object[list[int]] = providers.Object(config.admin_ids)
+

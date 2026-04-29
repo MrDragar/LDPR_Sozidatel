@@ -1,10 +1,10 @@
 import uuid
 from datetime import date, datetime, UTC
 
-from sqlalchemy import Date, DateTime
+from sqlalchemy import Date, DateTime, Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.domain.entities.user import User
+from src.domain.entities.user import User, Sources
 from src.infrastructure.database import Base
 
 
@@ -12,8 +12,10 @@ class UserORM(Base):
     __tablename__ = "users"
 
     id: Mapped[uuid.UUID] = mapped_column("id", primary_key=True)
-    telegram_id: Mapped[int] = mapped_column("telegram_id", unique=True, index=True,
+    telegram_id: Mapped[int] = mapped_column("telegram_id", unique=False, index=True,
                                                    nullable=True)
+    source: Mapped[Sources] = mapped_column(SQLEnum(Sources), name="source")
+
     is_member: Mapped[bool] = mapped_column("is_member", nullable=False)
     username: Mapped[str] = mapped_column("username", nullable=True)
     surname: Mapped[str] = mapped_column("surname", nullable=False)
@@ -49,6 +51,7 @@ class UserORM(Base):
         return User(
             id=self.id,
             telegram_id=self.telegram_id,
+            source=self.source,
             is_member=self.is_member,
             username=self.username,
             surname=self.surname,
@@ -79,6 +82,7 @@ class UserORM(Base):
         return cls(
             id=user.id,
             telegram_id=user.telegram_id,
+            source=user.source,
             is_member=user.is_member,
             username=user.username,
             surname=user.surname,

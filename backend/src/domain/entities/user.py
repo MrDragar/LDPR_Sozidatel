@@ -1,6 +1,13 @@
+import enum
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from uuid import UUID, uuid4
+
+
+class Sources(enum.Enum):
+    VK = 'vk'
+    TG = 'tg'
+    MAX = 'max'
 
 
 @dataclass
@@ -28,6 +35,7 @@ class User:
 
     home_address: str | None = None
     telegram_id: int | None = None
+    source: Sources | None = None
     username: str | None = None
     id: UUID | None = field(default_factory=uuid4)
     news_subscription: bool = field(default=False)
