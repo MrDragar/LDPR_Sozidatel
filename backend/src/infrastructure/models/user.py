@@ -14,8 +14,7 @@ class UserORM(Base):
     id: Mapped[uuid.UUID] = mapped_column("id", primary_key=True)
     telegram_id: Mapped[int] = mapped_column("telegram_id", unique=False, index=True,
                                                    nullable=True)
-    source: Mapped[Sources] = mapped_column(SQLEnum(Sources), name="source")
-
+    source: Mapped[Sources] = mapped_column(SQLEnum(Sources), name="source", nullable=True)
     is_member: Mapped[bool] = mapped_column("is_member", nullable=False)
     username: Mapped[str] = mapped_column("username", nullable=True)
     surname: Mapped[str] = mapped_column("surname", nullable=False)

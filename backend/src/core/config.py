@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 BOT_TOKEN = os.getenv("API_TOKEN")
 BOT_NAME = os.getenv("BOT_NAME")
+VK_BOT_ID = os.getenv("VK_BOT_ID")
 
 log_level = os.getenv("LOG_LEVEL", "INFO")
 log_file = os.getenv("LOG_FILE", None)

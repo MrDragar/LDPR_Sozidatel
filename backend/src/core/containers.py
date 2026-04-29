@@ -25,3 +25,4 @@ class Container(DeclarativeContainer):
     )
     bot_name: providers.Object[str] = providers.Object(config.BOT_NAME)
     bot_token: providers.Object[str] = providers.Object(config.BOT_TOKEN)
+    vk_bot_id: providers.Object[str] = providers.Object(config.VK_BOT_ID)

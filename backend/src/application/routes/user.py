@@ -2,7 +2,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, status, Depends, HTTPException, Path
 
-from src.application.dependencies.constants import get_bot_name
+from src.application.dependencies.constants import get_bot_name, get_vk_bot_id
 from src.application.dependencies.services import get_user_service
 from src.application.schema.user import UserCreateRequest, UserCreateResponse, ErrorResponse, UserActivatedResponse
 from src.services.interfaces import IUserService
@@ -22,14 +22,18 @@ router = APIRouter(prefix="/users", tags=["users"])
 async def create_user(
     request: UserCreateRequest,
     user_service: IUserService = Depends(get_user_service),
-    bot_name: str = Depends(get_bot_name)
+    bot_name: str = Depends(get_bot_name),
+    vk_bot_id: str = Depends(get_vk_bot_id),
 ):
     detail = None
     try:
         user = await user_service.create_user(
             **request.dict()
         )
-        return UserCreateResponse(id=user.id, link=f"https://t.me/{bot_name}?start={user.id}")
+        return UserCreateResponse(
+            id=user.id, tg_link=f"https://t.me/{bot_name}?start={user.id}",
+            vk_link=f"https://vk.me/club{vk_bot_id}?ref={user.id}"
+        )
     except exceptions.EmailBadFormatError:
         detail = "Некорректный формат почты"
     except exceptions.FioFormatError as e:

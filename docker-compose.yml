@@ -15,6 +15,7 @@ services:
       LOG_FILE: ${LOG_FILE}
       LOG_FORMAT: ${LOG_FORMAT}
       SECRET_KEY: ${SECRET_KEY}
+      VK_BOT_ID: ${VK_BOT_ID}
     restart: always
     ports:
       - '8000:8000'

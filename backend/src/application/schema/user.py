@@ -30,7 +30,8 @@ class UserCreateRequest(BaseModel):
 
 class UserCreateResponse(BaseModel):
     id: UUID
-    link: str
+    tg_link: str
+    vk_link: str
 
 
 class UserActivatedResponse(BaseModel):
