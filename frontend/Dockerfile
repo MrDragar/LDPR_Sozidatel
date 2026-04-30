@@ -1,5 +1,5 @@
 # Используем официальный образ Node.js на основе Alpine (легковесный)
-FROM node:18-alpine as builder
+FROM node:20-alpine as builder
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
