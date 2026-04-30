@@ -21,7 +21,7 @@ const INITIAL_DATA: FormData = {
     lastName: '',
     firstName: '',
     patronymic: '',
-    gender: '',
+    gender: 'Неизвестно',
     birthDate: '',
     phone: '',
     email: '',
@@ -255,7 +255,7 @@ const RegistrationPage: React.FC = () => {
         
         const newErrors: Record<string, string> = {};
         const fieldsToValidate = [
-            'lastName', 'firstName', 'patronymic', 'gender', 'birthDate', 'phone', 'email', 'city', 'region',
+            'lastName', 'firstName', 'patronymic', 'birthDate', 'phone', 'email', 'city', 'region',
             'organization', 'industry', 'ogrn', 
             'isMember', 'newsSubscription',
             'nominationId', 
@@ -421,7 +421,7 @@ const RegistrationPage: React.FC = () => {
 
     if (registrationState && !registrationState.isActivated) {
         return (
-            <div className="min-h-[100dvh] bg-gradient-to-br from-[#11236B] via-[#0d1b54] to-[#081033] font-sans text-white p-4 sm:p-6 lg:p-8 flex flex-col items-center justify-center relative">
+            <div className="min-h-[100dvh] w-full bg-gradient-to-br from-[#11236B] via-[#0d1b54] to-[#081033] font-sans text-white p-4 sm:p-6 lg:p-8 flex flex-col items-center justify-center relative">
                 <div className="max-w-3xl w-full bg-transparent sm:bg-white/5 border border-transparent sm:border-white/10 p-4 sm:p-12 rounded-3xl sm:shadow-2xl text-center backdrop-blur-sm">
                     <h2 className="text-3xl font-extrabold text-white mb-6 font-sans">Подтвердите участие</h2>
                     <p className="text-lg text-gray-300 mb-10 leading-relaxed font-sans max-w-xl mx-auto">
@@ -492,7 +492,7 @@ const RegistrationPage: React.FC = () => {
     }
 
     return (
-        <div className="min-h-[100dvh] bg-gradient-to-br from-[#11236B] via-[#0d1b54] to-[#081033] font-sans text-white pb-20 relative">
+        <div className="min-h-[100dvh] w-full bg-gradient-to-br from-[#11236B] via-[#0d1b54] to-[#081033] font-sans text-white pb-20 relative">
             {apiError && (
                 <div className="fixed top-6 left-1/2 -translate-x-1/2 sm:left-auto sm:right-6 sm:-translate-x-0 sm:translate-y-0 z-[100] w-[90%] sm:w-auto max-w-sm animate-in fade-in slide-in-from-top-5 duration-300">
                     <div className="bg-red-600 text-white px-5 py-4 rounded-xl shadow-2xl flex items-start gap-3 w-full border border-red-500/50">
@@ -644,33 +644,12 @@ const RegistrationPage: React.FC = () => {
                     background-color: rgba(255, 255, 255, 0.3);
                 }
             `}</style>
-            {/* СЕКЦИЯ 1: Hero-блок (Картинка на 100% ширины) */}
-            <div className="w-full mb-10 md:mb-14 shadow-2xl">
-                <img 
-                    src="https://psv4.userapi.com/s/v1/d2/MBv1LLJbuz-96_02um5StNpDsOUe8VFekXtJXz2yikDfJtE7VAd5WQTLGIK9oHnkouJyVvtk6d8M1U6IwtPmkrCPOK7tP6FlykGEa_wRt1B4bR-PsSC-itutFZ6qeb2ej5YjR6WMfEYS/photo_5208576917001855022_y_1.jpg" 
-                    alt="Премия Созидатель" 
-                    className="w-full h-auto md:aspect-[21/9] md:object-cover block"
-                    referrerPolicy="no-referrer"
-                />
-            </div>
-
-            <div className="max-w-4xl mx-auto px-4 md:px-6">
+            <div className="max-w-4xl mx-auto px-4 md:px-6 pt-12 md:pt-16">
                 {/* СЕКЦИЯ 1: Заголовок и Текст */}
-                <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-left text-white mb-6 tracking-tight">
-                    Премия «Созидатель»
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-left text-white mb-8 tracking-tight leading-tight">
+                    Всероссийская национальная премия за вклад в развитие экономики «Созидатель»
                 </h1>
-                
-                <div className="w-[15%] max-w-[100px] border-b-[6px] border-[#ed8a19] mb-8"></div>
 
-                <p className="text-lg md:text-xl text-blue-100 leading-relaxed mb-6 text-left font-medium">
-                    Всероссийская национальная премия для компаний и предпринимателей, которые производят инновационный продукт, применяют собственные новаторские технологии, вкладываются в науку и импортозамещение. Награждаем лучших, которые вносят реальный вклад в экономику!
-                </p>
-
-                {/* СЕКЦИЯ 2: Подзаголовок */}
-                <h2 className="text-xl md:text-2xl font-bold text-left text-white mb-16 leading-snug">
-                    III Всероссийская национальная премия за вклад в развитие экономики.
-                </h2>
-                
                 {/* СЕКЦИЯ 3: Описание премии */}
                 <div className="space-y-8 mb-16">
                     <div className="bg-white text-[#11236B] rounded-[2rem] p-8 md:p-12 shadow-xl">
@@ -800,8 +779,6 @@ const RegistrationPage: React.FC = () => {
                             <TextInput name="lastName" label="Фамилия" required value={formData.lastName} onChange={handleChange} onBlur={handleBlur} error={errors.lastName} format="capitalizeName" />
                             <TextInput name="firstName" label="Имя" required value={formData.firstName} onChange={handleChange} onBlur={handleBlur} error={errors.firstName} format="capitalizeName" />
                             <TextInput name="patronymic" label="Отчество" description="Если нет, то оставьте пустым" value={formData.patronymic} onChange={handleChange} onBlur={handleBlur} error={errors.patronymic} format="capitalizeName" />
-                            
-                            <RadioGroup name="gender" label="Пол" options={['Мужской', 'Женский']} required selected={formData.gender} onChange={handleChange} error={errors.gender} />
                             
                             <TextInput name="birthDate" label="Дата рождения" placeholder="Например: 15.05.1990" description="Введите вашу дату рождения в формате ДД.ММ.ГГГГ" required value={formData.birthDate} onChange={handleChange} onBlur={handleBlur} error={errors.birthDate} format="date" />
                             
@@ -960,7 +937,7 @@ const RegistrationPage: React.FC = () => {
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-base text-gray-200 leading-snug">
-                                            Принимаю <a href="https://clck.ru/3S7mvx" target="_blank" rel="noopener noreferrer" className="text-white underline decoration-white/50 hover:decoration-white transition-colors">условия обработки персональных данных</a>. <span className="text-red-500">*</span>
+                                            Принимаю <a href="https://disk.yandex.ru/i/syGJfx_DRbulSw" target="_blank" rel="noopener noreferrer" className="text-white underline decoration-white/50 hover:decoration-white transition-colors">условия обработки персональных данных</a>. <span className="text-red-500">*</span>
                                         </span>
                                         {errors.agreement2 && <p className="mt-1 text-sm text-red-600">{errors.agreement2}</p>}
                                     </div>
