@@ -424,8 +424,11 @@ const RegistrationPage: React.FC = () => {
             <div className="min-h-[100dvh] w-full bg-gradient-to-br from-[#11236B] via-[#0d1b54] to-[#081033] font-sans text-white p-4 sm:p-6 lg:p-8 flex flex-col items-center justify-center relative">
                 <div className="max-w-3xl w-full bg-transparent sm:bg-white/5 border border-transparent sm:border-white/10 p-4 sm:p-12 rounded-3xl sm:shadow-2xl text-center backdrop-blur-sm">
                     <h2 className="text-3xl font-extrabold text-white mb-6 font-sans">Подтвердите участие</h2>
-                    <p className="text-lg text-gray-300 mb-10 leading-relaxed font-sans max-w-xl mx-auto">
+                    <p className="text-lg text-gray-300 mb-10 leading-relaxed font-sans max-w-xl mx-auto hidden md:block">
                         Мы получили вашу анкету. Для завершения регистрации отсканируйте <strong>QR-код</strong> с мобильного устройства или нажмите на кнопку для перехода к боту в нужной соцсети.
+                    </p>
+                    <p className="text-lg text-gray-300 mb-10 leading-relaxed font-sans max-w-xl mx-auto md:hidden">
+                        Мы получили вашу анкету. Для завершения регистрации нажмите на кнопку для перехода к боту в нужной соцсети.
                     </p>
                     
                     <div className="flex flex-col md:flex-row gap-8 justify-center items-stretch mt-8 w-full mx-auto">
@@ -644,7 +647,7 @@ const RegistrationPage: React.FC = () => {
                     background-color: rgba(255, 255, 255, 0.3);
                 }
             `}</style>
-            <div className="max-w-4xl mx-auto px-4 md:px-6 pt-12 md:pt-16">
+            <div className="max-w-4xl mx-auto px-4 md:px-6 pt-4 md:pt-6">
                 {/* СЕКЦИЯ 1: Заголовок и Текст */}
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-left text-white mb-8 tracking-tight leading-tight">
                     Всероссийская национальная премия за вклад в развитие экономики «Созидатель»
