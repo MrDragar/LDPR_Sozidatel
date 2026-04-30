@@ -9,7 +9,7 @@ COPY package.json package-lock.json ./
 
 # Устанавливаем зависимости
 RUN npm ci
-
+RUN npm install
 # Копируем остальные файлы проекта
 COPY . .
 
